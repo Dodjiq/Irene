@@ -241,7 +241,24 @@ btnAmbiance.addEventListener("click", () => {
   allerAPage(page5);
   pluieDeCoeurs();
   setTimeout(pluieDeCoeurs, 900);
+
+  enregistrerReponse();
 });
+
+/* ---------- Envoi des réponses au back-office ---------- */
+
+function enregistrerReponse() {
+  // Si la base n'est pas joignable, le site continue de fonctionner normalement
+  if (typeof appelerBase !== "function") return;
+
+  appelerBase("irene_enregistrer", {
+    p_jour:       rendezVous.jour,
+    p_heure:      rendezVous.heure,
+    p_ambiance:   rendezVous.ambiance,
+    p_tentatives: nbFuites,          // nombre de tentatives sur le bouton "Non"
+    p_appareil:   navigator.userAgent,
+  }).catch((erreur) => console.warn("Réponse non enregistrée :", erreur.message));
+}
 
 /* ---------- Décor : coeurs qui montent ---------- */
 
