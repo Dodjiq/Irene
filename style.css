@@ -1,0 +1,566 @@
+/* ---------- Base ---------- */
+:root {
+  --titre: "Playfair Display", Georgia, "Times New Roman", serif;
+  --texte: "Quicksand", "Segoe UI", system-ui, sans-serif;
+  --plume: "Great Vibes", "Segoe Script", "Brush Script MT", cursive;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%; /* iOS ne grossit pas le texte tout seul */
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh; /* tient compte des barres de navigation mobiles */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(14px, 4vw, 24px);
+  font-family: var(--texte);
+  background: linear-gradient(135deg, #ffe3ec 0%, #ffc2d4 45%, #ffb3c6 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;   /* jamais de défilement horizontal */
+  overflow-y: auto;     /* mais on peut défiler si la carte est haute */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Carte ---------- */
+.carte {
+  position: relative;
+  z-index: 2;
+  width: min(520px, 100%);
+  margin: auto;
+  padding: clamp(26px, 6vw, 40px) clamp(18px, 5vw, 32px) clamp(30px, 7vw, 44px);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(224, 36, 94, 0.18);
+  animation: apparition 0.7s ease both;
+}
+
+@keyframes apparition {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Pages (on n'en affiche qu'une à la fois) ---------- */
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+  animation: apparition 0.5s ease both;
+}
+
+/* ---------- Image / coeur ---------- */
+.illustration {
+  margin-bottom: clamp(16px, 4vw, 26px);
+}
+
+.coeur {
+  width: clamp(96px, 26vw, 140px);
+  height: auto;
+  filter: drop-shadow(0 10px 18px rgba(224, 36, 94, 0.35));
+  animation: battement 1.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes battement {
+  0%, 100% { transform: scale(1); }
+  15%      { transform: scale(1.14); }
+  30%      { transform: scale(1); }
+  45%      { transform: scale(1.09); }
+  60%      { transform: scale(1); }
+}
+
+/* ---------- Emoji (page 2) ---------- */
+.emoji {
+  display: inline-block;
+  font-size: clamp(72px, 20vw, 110px);
+  line-height: 1;
+  filter: drop-shadow(0 10px 18px rgba(224, 36, 94, 0.25));
+}
+
+.emoji-choc {
+  animation: choc 0.6s ease both, sursaut 2.4s ease-in-out 0.6s infinite;
+}
+
+/* Le petit "pop" d'arrivée */
+@keyframes choc {
+  0%   { transform: scale(0.3) rotate(-12deg); opacity: 0; }
+  60%  { transform: scale(1.25) rotate(6deg); opacity: 1; }
+  80%  { transform: scale(0.95) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.emoji-calendrier {
+  animation: choc 0.6s ease both, balancement 3s ease-in-out 0.6s infinite;
+}
+
+@keyframes balancement {
+  0%, 100% { transform: rotate(-5deg); }
+  50%      { transform: rotate(5deg); }
+}
+
+/* Puis il tremble légèrement, comme s'il n'en revenait pas */
+@keyframes sursaut {
+  0%, 70%, 100% { transform: translateX(0) rotate(0deg); }
+  74% { transform: translateX(-5px) rotate(-4deg); }
+  78% { transform: translateX(5px) rotate(4deg); }
+  82% { transform: translateX(-4px) rotate(-3deg); }
+  86% { transform: translateX(4px) rotate(3deg); }
+  90% { transform: translateX(0) rotate(0deg); }
+}
+
+/* ---------- Textes ---------- */
+.question {
+  font-family: var(--titre);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 5.2vw, 2.3rem);
+  line-height: 1.3;
+  color: #8c0f36;
+  letter-spacing: 0.2px;
+}
+
+.sous-titre {
+  margin-top: 14px;
+  font-family: var(--titre);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.05rem;
+  letter-spacing: 0.3px;
+  color: #000;
+}
+
+.message {
+  margin-top: 22px;
+  min-height: 26px;
+  font-family: var(--titre);
+  font-style: italic;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #e0245e;
+}
+
+/* ---------- Page finale ---------- */
+.titre-final {
+  font-family: var(--titre);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 4.8vw, 2.05rem);
+  line-height: 1.35;
+  color: #8c0f36;
+  letter-spacing: 0.2px;
+}
+
+.rdv-final {
+  margin-top: 16px;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: #45142a;
+}
+
+.rdv-final strong {
+  font-family: var(--titre);
+  font-weight: 600;
+  font-size: 1.15em;
+  color: #e0245e;
+  white-space: nowrap;
+}
+
+.rdv-programme {
+  margin-top: 8px;
+  font-size: 0.98rem;
+  color: #a06b81;
+}
+
+.separateur {
+  margin: 26px auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1rem;
+  color: #e0245e;
+}
+
+.separateur::before,
+.separateur::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #ffb3c6, transparent);
+}
+
+.mot-amour {
+  font-family: var(--titre);
+  font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: #6b2540;
+}
+
+.signature {
+  margin-top: 26px;
+  font-family: var(--plume);
+  font-size: clamp(2.2rem, 8vw, 2.9rem);
+  line-height: 1.2;
+  color: #e0245e;
+  transform: rotate(-4deg);
+}
+
+.emoji-lettre {
+  animation: choc 0.6s ease both, flottement 3.2s ease-in-out 0.6s infinite;
+}
+
+@keyframes flottement {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-10px) rotate(3deg); }
+}
+
+/* ---------- Champs du rendez-vous (page 3) ---------- */
+.champs {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+.champ {
+  display: block;
+}
+
+.champ-titre {
+  display: block;
+  margin-bottom: 8px;
+  padding-left: 4px;
+  font-family: var(--titre);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #8c0f36;
+}
+
+.selecteur {
+  width: 100%;
+  max-width: 100%;
+  padding: 15px 46px 15px 18px;
+  font-family: var(--texte);
+  font-size: 16px; /* 16px minimum : évite le zoom automatique sur iOS */
+  touch-action: manipulation;
+  font-weight: 600;
+  color: #45142a;
+  background-color: rgba(255, 255, 255, 0.9);
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0245e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 18px;
+  border: 2px solid #ffc2d4;
+  border-radius: 16px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.selecteur:hover {
+  border-color: #ff8fb1;
+  transform: translateY(-2px);
+}
+
+.selecteur:focus {
+  outline: none;
+  border-color: #e0245e;
+  box-shadow: 0 0 0 4px rgba(224, 36, 94, 0.15);
+}
+
+/* Tant que rien n'est choisi, le texte reste gris clair */
+.selecteur.vide {
+  color: #9b8a92;
+  font-weight: 500;
+}
+
+.selecteur option {
+  color: #45142a;
+  font-weight: 500;
+}
+
+.recap {
+  margin-top: 24px;
+  min-height: 26px;
+  font-family: var(--titre);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #e0245e;
+}
+
+/* ---------- Cartes d'ambiance (page 4) ---------- */
+.ambiances {
+  margin-top: clamp(20px, 5vw, 28px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 3vw, 16px);
+}
+
+.ambiance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: clamp(16px, 4vw, 22px) clamp(8px, 2.5vw, 12px) clamp(14px, 3.5vw, 18px);
+  font-family: var(--texte);
+  text-align: center;
+  touch-action: manipulation;
+  background: rgba(255, 255, 255, 0.88);
+  border: 2px solid rgba(255, 194, 212, 0.9);
+  border-radius: 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(224, 36, 94, 0.1);
+  transition: transform 0.22s ease, box-shadow 0.22s ease,
+              border-color 0.22s ease, background 0.22s ease;
+}
+
+.ambiance:hover {
+  transform: translateY(-5px);
+  border-color: #ff8fb1;
+  box-shadow: 0 16px 28px rgba(224, 36, 94, 0.2);
+}
+
+.ambiance:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+.ambiance-icone {
+  font-size: clamp(30px, 9vw, 40px);
+  line-height: 1;
+  transition: transform 0.22s ease;
+}
+
+.ambiance:hover .ambiance-icone {
+  transform: scale(1.15) rotate(-6deg);
+}
+
+.ambiance-nom {
+  font-family: var(--titre);
+  font-weight: 600;
+  font-size: clamp(0.9rem, 3.4vw, 1rem);
+  color: #8c0f36;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+
+.ambiance-desc {
+  font-size: clamp(0.74rem, 2.8vw, 0.82rem);
+  color: #a06b81;
+  overflow-wrap: break-word;
+}
+
+/* Carte choisie */
+.ambiance.choisie {
+  position: relative;
+  border-color: #e0245e;
+  background: linear-gradient(160deg, #fff, #ffe3ec);
+  box-shadow: 0 14px 30px rgba(224, 36, 94, 0.28);
+  transform: translateY(-4px);
+}
+
+.ambiance.choisie::after {
+  content: "✓";
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  background: #e0245e;
+  border-radius: 50%;
+  animation: apparition 0.3s ease both;
+}
+
+.emoji-envie {
+  animation: choc 0.6s ease both, scintillement 2.6s ease-in-out 0.6s infinite;
+}
+
+@keyframes scintillement {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50%      { transform: scale(1.12) rotate(8deg); opacity: 0.85; }
+}
+
+/* ---------- Boutons ---------- */
+.boutons {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 3vw, 18px);
+  justify-content: center;
+  flex-wrap: nowrap; /* "Oui" et "Non" restent toujours côte à côte */
+}
+
+/* Couloir dans lequel le bouton "Non" glisse (il ne sort jamais de la ligne) */
+.piste {
+  position: relative;
+  display: block;
+  flex: 1 1 auto;
+  min-width: 108px;
+  max-width: 240px;
+  height: 52px;
+}
+
+.boutons .btn-oui {
+  flex: 0 0 auto; /* le "Oui" garde toujours sa taille */
+}
+
+.piste .btn-non {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+}
+
+.btn {
+  padding: 15px clamp(22px, 6vw, 38px);
+  font-family: var(--texte);
+  font-size: clamp(0.95rem, 3.4vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation; /* pas de zoom au double-tap */
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn-oui {
+  background: linear-gradient(135deg, #ff5f8f, #e0245e);
+  box-shadow: 0 10px 22px rgba(224, 36, 94, 0.35);
+}
+
+.btn-oui:hover {
+  transform: scale(1.09);
+  box-shadow: 0 14px 30px rgba(224, 36, 94, 0.45);
+}
+
+.btn-oui:active {
+  transform: scale(0.98);
+}
+
+/* Bouton en attente (ex : tant que le jour et l'heure ne sont pas choisis) */
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: saturate(0.5);
+}
+
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: 0 10px 22px rgba(224, 36, 94, 0.2);
+}
+
+.btn-non {
+  background: linear-gradient(135deg, #9aa4b2, #6b7280);
+  box-shadow: 0 10px 22px rgba(107, 114, 128, 0.3);
+  padding: 15px clamp(18px, 5vw, 32px);
+  transition: transform 0.24s cubic-bezier(0.22, 1.25, 0.36, 1),
+              background 0.3s ease;
+  will-change: transform;
+}
+
+/* Petite secousse quand il esquive */
+.btn-non.tremble {
+  animation: tremblement 0.4s ease;
+}
+
+@keyframes tremblement {
+  0%, 100% { filter: none; }
+  50%      { filter: brightness(1.25); }
+}
+
+/* ---------- Bulles / coeurs de fond ---------- */
+.bulles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bulle {
+  position: absolute;
+  bottom: -60px;
+  font-size: 22px;
+  opacity: 0;
+  animation: montee linear infinite;
+}
+
+@keyframes montee {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.75; }
+  90%  { opacity: 0.4; }
+  100% { transform: translateY(-110vh) rotate(320deg); opacity: 0; }
+}
+
+/* ---------- Accessibilité mouvement réduit ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .coeur { animation: none; }
+  .emoji-choc,
+  .emoji-calendrier,
+  .emoji-envie,
+  .emoji-lettre { animation: none; }
+  .bulle { display: none; }
+}
+
+/* ---------- Écrans tactiles : pas d'effet de survol collant ---------- */
+@media (hover: none) {
+  .btn-oui:hover,
+  .selecteur:hover { transform: none; }
+
+  .ambiance:hover {
+    transform: none;
+    border-color: rgba(255, 194, 212, 0.9);
+    box-shadow: 0 8px 18px rgba(224, 36, 94, 0.1);
+  }
+
+  .ambiance:hover .ambiance-icone { transform: none; }
+
+  /* La carte choisie garde bien son relief */
+  .ambiance.choisie:hover {
+    border-color: #e0245e;
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(224, 36, 94, 0.28);
+  }
+}
+
+/* ---------- Petits téléphones ---------- */
+@media (max-width: 400px) {
+  .carte { border-radius: 22px; }
+
+  .boutons { gap: 8px; }
+  .piste { min-width: 96px; }
+  .btn { padding: 14px 18px; letter-spacing: 0.2px; }
+
+  .champs { gap: 16px; }
+  .separateur { margin: 20px auto; }
+  .signature { margin-top: 20px; }
+}
+
+/* ---------- Écrans très bas (téléphone à l'horizontale) ---------- */
+@media (max-height: 560px) {
+  body { align-items: flex-start; }
+  .illustration { margin-bottom: 12px; }
+  .emoji { font-size: 62px; }
+  .coeur { width: 84px; }
+}
