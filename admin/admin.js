@@ -1,5 +1,5 @@
 /* =========================================================
-   Back-office : connexion puis consultation des réponses.
+   Back-office : connexion, puis tableau de bord.
    Le mot de passe n'est jamais dans le code : il est vérifié
    par la base de données (haché en bcrypt).
    ========================================================= */
@@ -13,9 +13,12 @@ const erreur         = document.getElementById("erreur");
 const btnConnexion   = document.getElementById("btnConnexion");
 const btnRafraichir  = document.getElementById("btnRafraichir");
 const btnDeconnexion = document.getElementById("btnDeconnexion");
+const compteConnecte = document.getElementById("compteConnecte");
 const compteur       = document.getElementById("compteur");
+const pastilleTotal  = document.getElementById("pastilleTotal");
 const stats          = document.getElementById("stats");
-const liste          = document.getElementById("liste");
+const lignes         = document.getElementById("lignes");
+const vide           = document.getElementById("vide");
 
 // Identifiants gardés le temps de l'onglet uniquement
 const CLE_SESSION = "irene-admin";
@@ -43,8 +46,12 @@ async function connecter(email, mdp) {
     const reponses = await appelerBase("irene_lire", { p_email: email, p_mdp: mdp });
 
     sessionStorage.setItem(CLE_SESSION, JSON.stringify({ email, mdp }));
+
     ecranConnexion.classList.add("cachee");
     ecranTableau.classList.remove("cachee");
+    document.body.classList.add("connecte");
+    compteConnecte.textContent = email;
+
     afficher(reponses);
   } catch (e) {
     erreur.textContent = e.message === "identifiants invalides"
@@ -87,48 +94,52 @@ btnRafraichir.addEventListener("click", async () => {
   }
 });
 
-/* ---------- Affichage ---------- */
+/* ---------- Affichage du tableau de bord ---------- */
 
 function afficher(reponses) {
-  compteur.textContent = reponses.length === 0
+  const total = reponses.length;
+
+  compteur.textContent = total === 0
     ? "Aucune réponse pour le moment"
-    : `${reponses.length} réponse${reponses.length > 1 ? "s" : ""} enregistrée${reponses.length > 1 ? "s" : ""}`;
+    : `${total} partie${total > 1 ? "s" : ""} terminée${total > 1 ? "s" : ""}`;
+  pastilleTotal.textContent = total;
 
   afficherStats(reponses);
 
-  liste.innerHTML = "";
+  lignes.innerHTML = "";
+  vide.classList.toggle("cachee", total > 0);
 
-  if (reponses.length === 0) {
-    const vide = document.createElement("p");
-    vide.className = "vide-message";
-    vide.textContent = "Elle n'a pas encore terminé le quiz... patience 💗";
-    liste.appendChild(vide);
-    return;
-  }
-
-  reponses.forEach((r) => liste.appendChild(carteReponse(r)));
+  reponses.forEach((r) => lignes.appendChild(ligne(r)));
 }
 
-function carteReponse(r) {
-  const carte = document.createElement("article");
-  carte.className = "reponse";
+function ligne(r) {
+  const tr = document.createElement("tr");
 
-  const date = document.createElement("p");
-  date.className = "reponse-date";
-  date.textContent = formaterDate(r.cree_le);
+  tr.appendChild(cellule("Quand", formaterDate(r.cree_le), "cellule-date"));
+  tr.appendChild(cellule("Jour choisi", r.jour, "cellule-forte"));
+  tr.appendChild(cellule("Heure", r.heure, "cellule-forte"));
 
-  const rdv = document.createElement("p");
-  rdv.className = "reponse-rdv";
-  rdv.textContent = `${r.jour} à ${r.heure}`;
+  const ambiance = document.createElement("td");
+  ambiance.dataset.colonne = "Ambiance";
+  ambiance.appendChild(etiquette(`${icones[r.ambiance] || "✨"} ${r.ambiance}`));
+  tr.appendChild(ambiance);
 
-  const details = document.createElement("div");
-  details.className = "reponse-details";
-  details.appendChild(etiquette(`${icones[r.ambiance] || "✨"} ${r.ambiance}`));
-  details.appendChild(etiquette(`${r.tentatives_non} tentative${r.tentatives_non > 1 ? "s" : ""} sur "Non"`, true));
-  details.appendChild(etiquette(appareil(r.appareil), true));
+  const tentatives = document.createElement("td");
+  tentatives.dataset.colonne = "Tentatives « Non »";
+  tentatives.appendChild(etiquette(String(r.tentatives_non), true));
+  tr.appendChild(tentatives);
 
-  carte.append(date, rdv, details);
-  return carte;
+  tr.appendChild(cellule("Appareil", appareil(r.appareil), "cellule-appareil"));
+
+  return tr;
+}
+
+function cellule(colonne, texte, classe) {
+  const td = document.createElement("td");
+  td.dataset.colonne = colonne;
+  if (classe) td.className = classe;
+  td.textContent = texte;
+  return td;
 }
 
 function etiquette(texte, gris = false) {
@@ -149,31 +160,36 @@ function afficherStats(reponses) {
     return Object.entries(comptes).sort((a, b) => b[1] - a[1])[0][0];
   };
 
-  const maxTentatives = total
-    ? Math.max(...reponses.map((r) => r.tentatives_non))
-    : 0;
+  const record = total ? Math.max(...reponses.map((r) => r.tentatives_non)) : 0;
+  const ambiance = plusFrequent("ambiance");
 
   const donnees = [
-    ["Réponses", total],
-    ["Jour préféré", plusFrequent("jour")],
-    ["Heure préférée", plusFrequent("heure")],
-    ["Record sur \"Non\"", maxTentatives],
+    ["💌", "Parties terminées", total],
+    ["🗓️", "Jour préféré",      plusFrequent("jour")],
+    ["🕰️", "Heure préférée",    plusFrequent("heure")],
+    ["✨", "Ambiance préférée", total ? `${icones[ambiance] || ""} ${ambiance}` : "—"],
+    ["🏃", "Record sur « Non »", record],
   ];
 
   stats.innerHTML = "";
-  donnees.forEach(([nom, valeur]) => {
+
+  donnees.forEach(([icone, nom, valeur]) => {
     const bloc = document.createElement("div");
     bloc.className = "stat";
 
-    const v = document.createElement("span");
-    v.className = "stat-valeur";
-    v.textContent = valeur;
+    const i = document.createElement("span");
+    i.className = "stat-icone";
+    i.textContent = icone;
 
     const n = document.createElement("span");
     n.className = "stat-nom";
     n.textContent = nom;
 
-    bloc.append(v, n);
+    const v = document.createElement("span");
+    v.className = "stat-valeur";
+    v.textContent = valeur;
+
+    bloc.append(i, n, v);
     stats.appendChild(bloc);
   });
 }

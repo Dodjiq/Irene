@@ -15,55 +15,94 @@
 </head>
 <body class="admin">
 
-  <!-- ===== Connexion ===== -->
-  <main class="carte carte-admin" id="ecranConnexion">
-    <div class="illustration">
-      <span class="emoji emoji-cadenas">🔐</span>
-    </div>
+  <!-- ===================== CONNEXION (centrée) ===================== -->
+  <div class="ecran-connexion" id="ecranConnexion">
+    <main class="carte carte-connexion">
 
-    <h1 class="question">Back-office</h1>
-    <p class="sous-titre">Connecte-toi pour voir les réponses</p>
-
-    <form class="champs" id="formConnexion">
-      <label class="champ" for="email">
-        <span class="champ-titre">Adresse e-mail</span>
-        <input class="saisie" type="email" id="email" autocomplete="username"
-               placeholder="ton@email.com" required>
-      </label>
-
-      <label class="champ" for="motdepasse">
-        <span class="champ-titre">Mot de passe</span>
-        <input class="saisie" type="password" id="motdepasse" autocomplete="current-password"
-               placeholder="••••••••" required>
-      </label>
-
-      <p class="erreur" id="erreur"></p>
-
-      <div class="boutons">
-        <button type="submit" class="btn btn-oui" id="btnConnexion">Se connecter</button>
+      <div class="illustration">
+        <span class="emoji emoji-cadenas">🔐</span>
       </div>
-    </form>
-  </main>
 
-  <!-- ===== Tableau de bord ===== -->
-  <main class="carte carte-admin carte-large cachee" id="ecranTableau">
+      <h1 class="question">Back-office</h1>
+      <p class="sous-titre">Connecte-toi pour voir ses réponses</p>
 
-    <header class="entete-admin">
-      <div>
-        <h1 class="titre-admin">Les réponses d'Irène</h1>
-        <p class="sous-titre-admin" id="compteur">—</p>
+      <form class="champs" id="formConnexion">
+        <label class="champ" for="email">
+          <span class="champ-titre">Adresse e-mail</span>
+          <input class="saisie" type="email" id="email" autocomplete="username"
+                 placeholder="ton@email.com" required>
+        </label>
+
+        <label class="champ" for="motdepasse">
+          <span class="champ-titre">Mot de passe</span>
+          <input class="saisie" type="password" id="motdepasse" autocomplete="current-password"
+                 placeholder="••••••••" required>
+        </label>
+
+        <p class="erreur" id="erreur"></p>
+
+        <div class="boutons">
+          <button type="submit" class="btn btn-oui" id="btnConnexion">Se connecter</button>
+        </div>
+      </form>
+
+    </main>
+  </div>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <div class="tableau-bord cachee" id="ecranTableau">
+
+    <header class="barre">
+      <div class="marque">
+        <span class="marque-icone">💌</span>
+        <span class="marque-texte">Irene<span class="marque-fin"> — back-office</span></span>
       </div>
-      <div class="actions-admin">
+
+      <div class="barre-actions">
+        <span class="compte" id="compteConnecte"></span>
         <button type="button" class="btn-mini" id="btnRafraichir">↻ Rafraîchir</button>
-        <button type="button" class="btn-mini btn-mini-sortie" id="btnDeconnexion">Se déconnecter</button>
+        <button type="button" class="btn-mini btn-mini-sortie" id="btnDeconnexion">Déconnexion</button>
       </div>
     </header>
 
-    <div class="stats" id="stats"></div>
+    <main class="contenu">
 
-    <div class="liste" id="liste"></div>
+      <div class="accueil">
+        <h1 class="titre-tableau">Les réponses d'Irène</h1>
+        <p class="sous-titre-tableau" id="compteur">—</p>
+      </div>
 
-  </main>
+      <section class="stats" id="stats"></section>
+
+      <section class="panneau">
+        <div class="panneau-entete">
+          <h2 class="panneau-titre">Détail des parties</h2>
+          <span class="pastille" id="pastilleTotal">0</span>
+        </div>
+
+        <div class="tableau-conteneur">
+          <table class="tableau">
+            <thead>
+              <tr>
+                <th>Quand</th>
+                <th>Jour choisi</th>
+                <th>Heure</th>
+                <th>Ambiance</th>
+                <th>Tentatives « Non »</th>
+                <th>Appareil</th>
+              </tr>
+            </thead>
+            <tbody id="lignes"></tbody>
+          </table>
+        </div>
+
+        <p class="vide-message cachee" id="vide">
+          Elle n'a pas encore terminé le quiz... patience 💗
+        </p>
+      </section>
+
+    </main>
+  </div>
 
   <script src="../config.js"></script>
   <script src="admin.js"></script>
