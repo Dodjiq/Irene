@@ -3,194 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Une question...</title>
+  <title>Pour Irène</title>
+  <meta name="description" content="Une page écrite pour une seule personne.">
 
-  <!-- Polices élégantes (avec repli sur des polices système si hors ligne) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="bulles" id="bulles"></div>
+  <!-- Le ciel : étoiles et cœurs, générés au chargement -->
+  <div class="ciel" id="ciel" aria-hidden="true"></div>
 
-  <main class="carte">
+  <!-- ================= 1. OUVERTURE ================= -->
+  <section class="scene ouverture">
+    <p class="surtitre reveler">Pour toi,</p>
+    <h1 class="prenom reveler">Irène</h1>
 
-  <!-- ================= PAGE 1 : la question ================= -->
-  <section class="page active" id="page1">
-
-    <div class="illustration">
-      <svg class="coeur" viewBox="0 0 100 90" aria-label="Un coeur">
-        <defs>
-          <linearGradient id="degradeCoeur" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#ff8fb1"/>
-            <stop offset="100%" stop-color="#e0245e"/>
-          </linearGradient>
-        </defs>
-        <path d="M50 88 C 12 60, 0 40, 0 25 A 25 25 0 0 1 50 18 A 25 25 0 0 1 100 25 C 100 40, 88 60, 50 88 Z"
-              fill="url(#degradeCoeur)"/>
-        <ellipse class="reflet" cx="30" cy="30" rx="9" ry="13" fill="#fff" opacity="0.35"/>
-      </svg>
-    </div>
-
-    <h1 class="question">Tu veux toujours sortir avec moi&nbsp;?</h1>
-    <p class="sous-titre">Réfléchis bien... enfin, pas trop longtemps&nbsp;😊</p>
-
-    <div class="boutons">
-      <button type="button" class="btn btn-oui" id="btnOui">Oui&nbsp;💖</button>
-
-      <!-- Le bouton "Non" se déplace uniquement à l'intérieur de cette piste -->
-      <span class="piste" id="piste">
-        <button type="button" class="btn btn-non" id="btnNon">Non</button>
-      </span>
-    </div>
-
-    <p class="message" id="message"></p>
-
-  </section>
-
-  <!-- ================= PAGE 2 : la réaction ================= -->
-  <section class="page" id="page2">
-
-    <div class="illustration">
-      <span class="emoji emoji-choc">😳</span>
-    </div>
-
-    <h1 class="question">Attends... t'as vraiment dit oui&nbsp;?</h1>
-    <p class="sous-titre">J'étais tellement stressé&nbsp;!</p>
-
-    <div class="boutons">
-      <button type="button" class="btn btn-oui" id="btnDaccord">D'accord d'accord&nbsp;😅</button>
-    </div>
-
-  </section>
-
-  <!-- ================= PAGE 3 : le rendez-vous ================= -->
-  <section class="page" id="page3">
-
-    <div class="illustration">
-      <span class="emoji emoji-calendrier">🗓️</span>
-    </div>
-
-    <h1 class="question">Alors... quand es-tu libre&nbsp;?</h1>
-    <p class="sous-titre">À toi de fixer le programme&nbsp;💫</p>
-
-    <div class="champs">
-
-      <label class="champ" for="jour">
-        <span class="champ-titre">Choisis un jour</span>
-        <select class="selecteur" id="jour">
-          <option value="" selected disabled>Appuie pour choisir</option>
-          <option value="Lundi">Lundi</option>
-          <option value="Mardi">Mardi</option>
-          <option value="Mercredi">Mercredi</option>
-          <option value="Jeudi">Jeudi</option>
-          <option value="Vendredi">Vendredi</option>
-          <option value="Samedi">Samedi</option>
-          <option value="Dimanche">Dimanche</option>
-        </select>
-      </label>
-
-      <label class="champ" for="heure">
-        <span class="champ-titre">Quelle heure&nbsp;?</span>
-        <select class="selecteur" id="heure">
-          <option value="" selected disabled>Appuie pour choisir</option>
-          <option value="17h00">17h00 — pour les lève-tôt</option>
-          <option value="18h00">18h00 — le bon compromis</option>
-          <option value="19h00">19h00 — en retard, mais avec classe</option>
-          <option value="20h00">20h00 — oiseau de nuit</option>
-        </select>
-      </label>
-
-    </div>
-
-    <p class="recap" id="recap"></p>
-
-    <div class="boutons">
-      <button type="button" class="btn btn-oui" id="btnDate" disabled>Fixer la date&nbsp;!</button>
-    </div>
-
-  </section>
-
-  <!-- ================= PAGE 4 : l'ambiance ================= -->
-  <section class="page" id="page4">
-
-    <div class="illustration">
-      <span class="emoji emoji-envie">✨</span>
-    </div>
-
-    <h1 class="question">De quoi as-tu envie&nbsp;?</h1>
-    <p class="sous-titre">Choisis ton ambiance</p>
-
-    <div class="ambiances" id="ambiances">
-
-      <button type="button" class="ambiance" data-nom="Sortie en amoureux">
-        <span class="ambiance-icone">💑</span>
-        <span class="ambiance-nom">Sortie en amoureux</span>
-        <span class="ambiance-desc">Juste toi et moi</span>
-      </button>
-
-      <button type="button" class="ambiance" data-nom="Mougouli intense">
-        <span class="ambiance-icone">🔥</span>
-        <span class="ambiance-nom">Mougouli intense</span>
-        <span class="ambiance-desc">On ne se retient pas</span>
-      </button>
-
-      <button type="button" class="ambiance" data-nom="Soirée cinéma">
-        <span class="ambiance-icone">🍿</span>
-        <span class="ambiance-nom">Soirée cinéma</span>
-        <span class="ambiance-desc">Film, plaid, popcorn</span>
-      </button>
-
-      <button type="button" class="ambiance" data-nom="Balade à la plage">
-        <span class="ambiance-icone">🏖️</span>
-        <span class="ambiance-nom">Balade à la plage</span>
-        <span class="ambiance-desc">Pieds nus dans le sable</span>
-      </button>
-
-    </div>
-
-    <p class="recap" id="recapAmbiance"></p>
-
-    <div class="boutons">
-      <button type="button" class="btn btn-oui" id="btnAmbiance" disabled>C'est parti&nbsp;!</button>
-    </div>
-
-  </section>
-
-  <!-- ================= PAGE 5 : le mot final ================= -->
-  <section class="page" id="page5">
-
-    <div class="illustration">
-      <span class="emoji emoji-lettre">💌</span>
-    </div>
-
-    <h1 class="titre-final">Je suis content que tu n'aies pas dit non</h1>
-
-    <p class="rdv-final">
-      Sois prête pour le <strong id="finalJour">—</strong>
-      à <strong id="finalHeure">—</strong>.
-    </p>
-    <p class="rdv-programme" id="finalAmbiance"></p>
-    <p class="rdv-final">Je passe te chercher.</p>
-
-    <div class="separateur">💗</div>
-
-    <p class="mot-amour">
-      P.S. — les gens normaux envoient un texto. Moi, j'ai fait ce petit quiz
-      rien que pour toi, parce qu'un simple message ne suffisait pas à dire
-      à quel point je t'aime.
+    <p class="intro reveler">
+      Je n'ai jamais réussi à te le dire en une seule phrase.<br>
+      Alors j'ai pris toute une page.
     </p>
 
-    <p class="signature">Dodji</p>
-
+    <div class="descendre reveler">
+      <span class="descendre-texte">Fais défiler</span>
+      <span class="descendre-fleche"></span>
+    </div>
   </section>
 
-  </main>
+  <!-- ================= 2. LE COMPTEUR ================= -->
+  <section class="scene compteur-scene">
+    <h2 class="titre-scene reveler">À quel point je t'aime&nbsp;?</h2>
+    <p class="chapeau reveler">J'ai essayé de mesurer. Voilà le résultat.</p>
 
-  <script src="config.js"></script>
+    <div class="jauge reveler" id="jauge">
+      <div class="jauge-valeur" id="jaugeValeur">0<span class="jauge-unite">%</span></div>
+      <div class="jauge-piste"><div class="jauge-barre" id="jaugeBarre"></div></div>
+      <p class="jauge-legende" id="jaugeLegende">mesure en cours...</p>
+    </div>
+  </section>
+
+  <!-- ================= 3. LES RAISONS ================= -->
+  <section class="scene raisons-scene">
+    <h2 class="titre-scene reveler">Ce que j'aime chez toi</h2>
+    <p class="chapeau reveler">Touche une carte pour la retourner.</p>
+
+    <div class="raisons" id="raisons">
+
+      <button type="button" class="raison reveler">
+        <span class="raison-face raison-devant">
+          <span class="raison-icone">😄</span>
+          <span class="raison-titre">Ton rire</span>
+        </span>
+        <span class="raison-face raison-derriere">
+          Celui que tu essaies de retenir et qui finit toujours par gagner.
+        </span>
+      </button>
+
+      <button type="button" class="raison reveler">
+        <span class="raison-face raison-devant">
+          <span class="raison-icone">👀</span>
+          <span class="raison-titre">Ton regard</span>
+        </span>
+        <span class="raison-face raison-derriere">
+          Il me dit ce que tu penses avant même que tu ouvres la bouche.
+        </span>
+      </button>
+
+      <button type="button" class="raison reveler">
+        <span class="raison-face raison-devant">
+          <span class="raison-icone">🕊️</span>
+          <span class="raison-titre">Ton calme</span>
+        </span>
+        <span class="raison-face raison-derriere">
+          Près de toi, les journées compliquées deviennent tout à coup gérables.
+        </span>
+      </button>
+
+      <button type="button" class="raison reveler">
+        <span class="raison-face raison-devant">
+          <span class="raison-icone">🔥</span>
+          <span class="raison-titre">Ton caractère</span>
+        </span>
+        <span class="raison-face raison-derriere">
+          Tu ne te laisses pas faire, et j'admire ça bien plus que tu ne l'imagines.
+        </span>
+      </button>
+
+      <button type="button" class="raison reveler">
+        <span class="raison-face raison-devant">
+          <span class="raison-icone">🤍</span>
+          <span class="raison-titre">Ta douceur</span>
+        </span>
+        <span class="raison-face raison-derriere">
+          Cette façon que tu as de prendre soin des gens sans jamais le dire.
+        </span>
+      </button>
+
+      <button type="button" class="raison reveler">
+        <span class="raison-face raison-devant">
+          <span class="raison-icone">🌙</span>
+          <span class="raison-titre">Nos silences</span>
+        </span>
+        <span class="raison-face raison-derriere">
+          Avec toi, même ne rien dire est une conversation.
+        </span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ================= 4. LA LETTRE ================= -->
+  <section class="scene lettre-scene">
+    <article class="lettre reveler">
+      <p class="lettre-entete" id="lettreEntete"></p>
+
+      <p class="lettre-ligne">
+        Il y a des gens qu'on croise, et il y a ceux qui changent la couleur
+        de tout ce qui vient après. Tu es la deuxième catégorie.
+      </p>
+
+      <p class="lettre-ligne">
+        Je ne sais pas t'expliquer pourquoi une journée banale devient
+        supportable dès que ton nom s'affiche sur mon écran. Ni pourquoi
+        je retiens des détails de toi que tu as sûrement oubliés.
+      </p>
+
+      <p class="lettre-ligne">
+        Je sais juste que je n'ai pas envie d'imaginer la suite sans toi
+        dedans. Pas par peur d'être seul&nbsp;: parce que c'est <em>toi</em>.
+      </p>
+
+      <p class="lettre-ligne">
+        Alors voilà. Pas de grande déclaration compliquée.
+        Juste ça, écrit noir sur blanc, pour que tu puisses y revenir
+        les jours où tu en doutes&nbsp;:
+      </p>
+
+      <p class="lettre-final">Je t'aime, Irène.</p>
+
+      <p class="signature">Dodji</p>
+    </article>
+  </section>
+
+  <!-- ================= 5. LE BOUTON ================= -->
+  <section class="scene final-scene">
+    <h2 class="titre-scene reveler">Et si tu veux l'entendre encore&nbsp;:</h2>
+
+    <button type="button" class="bouton-amour reveler" id="boutonAmour">
+      <span class="bouton-coeur">❤️</span>
+      <span>Je t'aime</span>
+    </button>
+
+    <p class="compte-message" id="compteMessage">Appuie autant de fois que tu veux.</p>
+    <p class="compte-total" id="compteTotal"></p>
+  </section>
+
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,290 +1,246 @@
 /* =========================================================
-   Le bouton "Non" reste à côté du "Oui", mais glisse
-   toujours du côté opposé au curseur : impossible à cliquer.
+   Pour Irène — le ciel, les apparitions, le compteur,
+   les cartes et le bouton final.
    ========================================================= */
 
-const page1   = document.getElementById("page1");
-const page2   = document.getElementById("page2");
-const page3   = document.getElementById("page3");
-const page4   = document.getElementById("page4");
-const page5   = document.getElementById("page5");
-const btnNon  = document.getElementById("btnNon");
-const btnOui  = document.getElementById("btnOui");
-const btnDaccord = document.getElementById("btnDaccord");
-const piste   = document.getElementById("piste");
-const message = document.getElementById("message");
-const bulles  = document.getElementById("bulles");
+const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const aleatoire = (min, max) => Math.random() * (max - min) + min;
 
-const RAYON_H    = 110;  // distance horizontale de détection (px)
-const RAYON_V    = 90;   // distance verticale de détection (px)
-const REPOS      = 200;  // délai minimum entre deux esquives (ms)
-const ECHELLE_MIN = 0.7;
+/* ---------------------------------------------------------
+   1. Le ciel : étoiles + cœurs qui montent
+   --------------------------------------------------------- */
+const ciel = document.getElementById("ciel");
 
-let posX          = 0;   // décalage horizontal actuel dans la piste
-let nbFuites      = 0;
-let derniereFuite = 0;
+function remplirLeCiel() {
+  if (mouvementReduit) return;
 
-const phrases = [
-  "Essaie encore 😏",
-  "Trop lent !",
-  "Non... mais non 😄",
-  "Il file à gauche !",
-  "Et hop, à droite !",
-  "Tu n'y arriveras pas",
-  "Raté !",
-  "Allez, dis oui 💕",
+  for (let i = 0; i < 70; i++) {
+    const etoile = document.createElement("span");
+    const taille = aleatoire(1, 2.8);
+
+    etoile.className = "etoile";
+    etoile.style.width = etoile.style.height = taille + "px";
+    etoile.style.left = aleatoire(0, 100) + "vw";
+    etoile.style.top = aleatoire(0, 100) + "vh";
+    etoile.style.animationDuration = aleatoire(2.5, 6) + "s";
+    etoile.style.animationDelay = aleatoire(0, 5) + "s";
+
+    ciel.appendChild(etoile);
+  }
+
+  for (let i = 0; i < 12; i++) {
+    const coeur = document.createElement("span");
+
+    coeur.className = "coeur-flottant";
+    coeur.textContent = Math.random() > 0.5 ? "🤍" : "💗";
+    coeur.style.left = aleatoire(0, 100) + "vw";
+    coeur.style.fontSize = aleatoire(11, 22) + "px";
+    coeur.style.animationDuration = aleatoire(16, 30) + "s";
+    coeur.style.animationDelay = aleatoire(0, 18) + "s";
+
+    ciel.appendChild(coeur);
+  }
+}
+
+remplirLeCiel();
+
+/* ---------------------------------------------------------
+   2. Apparition des éléments au défilement
+   --------------------------------------------------------- */
+const observateur = new IntersectionObserver((entrees) => {
+  entrees.forEach((entree) => {
+    if (!entree.isIntersecting) return;
+    entree.target.classList.add("visible");
+    observateur.unobserve(entree.target);
+  });
+}, { threshold: 0.25, rootMargin: "0px 0px -40px 0px" });
+
+document.querySelectorAll(".reveler").forEach((el) => observateur.observe(el));
+
+/* Les cartes des raisons apparaissent l'une après l'autre */
+document.querySelectorAll(".raisons .raison").forEach((carte, i) => {
+  carte.style.transitionDelay = 0.1 + i * 0.09 + "s";
+});
+
+/* ---------------------------------------------------------
+   3. Le compteur qui déborde
+   --------------------------------------------------------- */
+const jauge     = document.getElementById("jauge");
+const valeur    = document.getElementById("jaugeValeur");
+const barre     = document.getElementById("jaugeBarre");
+const legende   = document.getElementById("jaugeLegende");
+
+const paliers = [
+  [0,  "mesure en cours..."],
+  [25, "déjà plus que tout ce que j'avais prévu"],
+  [55, "on approche du maximum"],
+  [80, "attention, ça monte encore"],
+  [97, "le compteur commence à chauffer"],
 ];
 
-function aleatoire(min, max) {
-  return Math.random() * (max - min) + min;
-}
+function lancerCompteur() {
+  const duree = 2600;
+  const depart = performance.now();
 
-/* Largeur de déplacement disponible dans la piste */
-function courseMax() {
-  return Math.max(0, piste.clientWidth - btnNon.offsetWidth);
-}
+  function etape(maintenant) {
+    const avancee = Math.min(1, (maintenant - depart) / duree);
+    // Démarrage franc puis ralentissement
+    const adouci = 1 - Math.pow(1 - avancee, 3);
+    const pourcentage = Math.round(adouci * 100);
 
-/* Esquive : le bouton part du côté opposé au curseur */
-function fuir(sourisX) {
-  if (!page1.classList.contains("active")) return; // page 1 quittée : plus rien à esquiver
+    valeur.firstChild.textContent = pourcentage;
+    barre.style.width = pourcentage + "%";
 
-  const maintenant = Date.now();
-  if (maintenant - derniereFuite < REPOS) return;
-  derniereFuite = maintenant;
+    const palier = paliers.filter(([seuil]) => pourcentage >= seuil).pop();
+    if (palier) legende.textContent = palier[1];
 
-  const max = courseMax();
-  const rect = btnNon.getBoundingClientRect();
-  const centreBouton = rect.left + rect.width / 2;
-
-  // Le curseur vient de la gauche -> on fuit à droite, et inversement
-  const versLaDroite = (sourisX ?? centreBouton) <= centreBouton;
-
-  // On vise l'extrémité opposée, avec un léger aléa pour varier
-  let cible = versLaDroite ? max - aleatoire(0, max * 0.15)
-                           : aleatoire(0, max * 0.15);
-
-  // Si on est déjà collé à cette extrémité, on repart de l'autre côté
-  if (Math.abs(cible - posX) < max * 0.25) {
-    cible = versLaDroite ? aleatoire(0, max * 0.1) : max - aleatoire(0, max * 0.1);
+    if (avancee < 1) {
+      requestAnimationFrame(etape);
+    } else {
+      setTimeout(deborder, 900);
+    }
   }
 
-  posX = Math.min(max, Math.max(0, cible));
-  nbFuites++;
-
-  const echelle  = Math.max(ECHELLE_MIN, 1 - nbFuites * 0.02);
-  const rotation = aleatoire(-12, 12);
-
-  btnNon.style.transform = `translateX(${posX}px) scale(${echelle}) rotate(${rotation}deg)`;
-
-  btnNon.classList.remove("tremble");
-  void btnNon.offsetWidth; // relance l'animation
-  btnNon.classList.add("tremble");
-
-  message.textContent = phrases[nbFuites % phrases.length];
+  requestAnimationFrame(etape);
 }
 
-/* ---------- Déclencheurs ---------- */
-
-// 1) Survol direct
-btnNon.addEventListener("mouseenter", (e) => fuir(e.clientX));
-btnNon.addEventListener("mouseover",  (e) => fuir(e.clientX));
-
-// 2) Approche du curseur : il part avant même le survol
-document.addEventListener("mousemove", (e) => {
-  const rect = btnNon.getBoundingClientRect();
-  const centreX = rect.left + rect.width / 2;
-  const centreY = rect.top + rect.height / 2;
-
-  if (Math.abs(e.clientX - centreX) < RAYON_H + rect.width / 2 &&
-      Math.abs(e.clientY - centreY) < RAYON_V) {
-    fuir(e.clientX);
-  }
-});
-
-// 3) Tentative de clic (souris, tactile, stylet)
-btnNon.addEventListener("pointerdown", (e) => {
-  e.preventDefault();
-  derniereFuite = 0;          // un clic passe toujours : pas de temporisation
-  fuir(e.clientX);
-});
-
-btnNon.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  derniereFuite = 0;
-  fuir(e.touches[0].clientX);
-}, { passive: false });
-
-btnNon.addEventListener("click", (e) => {
-  e.preventDefault();
-  derniereFuite = 0;
-  fuir();
-});
-
-// 4) Navigation au clavier : il s'échappe aussi
-btnNon.addEventListener("focus", () => {
-  derniereFuite = 0;
-  fuir();
-  btnNon.blur();
-});
-
-// 5) Redimensionnement : on le garde dans sa piste
-window.addEventListener("resize", () => {
-  posX = Math.min(posX, courseMax());
-  btnNon.style.transform = `translateX(${posX}px)`;
-});
-
-/* ---------- Navigation entre les pages ---------- */
-
-function allerAPage(pageCible) {
-  document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
-  pageCible.classList.add("active");
+/* Arrivé à 100 %, la mesure lâche */
+function deborder() {
+  jauge.classList.add("depasse");
+  valeur.firstChild.textContent = "∞";
+  legende.textContent = "il n'existe pas d'unité pour ça.";
 }
 
-/* Oui -> page 2 : la réaction */
-btnOui.addEventListener("click", () => {
-  allerAPage(page2);
-  pluieDeCoeurs();
-});
+const observateurJauge = new IntersectionObserver((entrees) => {
+  entrees.forEach((entree) => {
+    if (!entree.isIntersecting) return;
+    observateurJauge.unobserve(entree.target);
 
-/* "D'accord d'accord" -> page 3 : on fixe le rendez-vous */
-btnDaccord.addEventListener("click", () => {
-  allerAPage(page3);
-});
-
-/* ---------- Page 3 : jour + heure ---------- */
-
-const selJour  = document.getElementById("jour");
-const selHeure = document.getElementById("heure");
-const recap    = document.getElementById("recap");
-const btnDate  = document.getElementById("btnDate");
-
-// Ce que l'utilisateur a choisi au fil des pages
-const rendezVous = { jour: "", heure: "", ambiance: "" };
-
-// Petit commentaire selon l'heure choisie
-const motsHeure = {
-  "17h00": "Debout avant tout le monde, j'admire 🌅",
-  "18h00": "Parfait, ni trop tôt ni trop tard 👌",
-  "19h00": "L'heure des gens qui ont du style ✨",
-  "20h00": "Va pour la nuit, alors 🌙",
-};
-
-function majRecap() {
-  const jour  = selJour.value;
-  const heure = selHeure.value;
-
-  rendezVous.jour  = jour;
-  rendezVous.heure = heure;
-
-  // Le champ garde sa couleur "placeholder" tant qu'il est vide
-  selJour.classList.toggle("vide", !jour);
-  selHeure.classList.toggle("vide", !heure);
-
-  // Le bouton ne s'active qu'une fois les deux champs remplis
-  btnDate.disabled = !(jour && heure);
-
-  if (jour && heure) {
-    recap.textContent = `${jour}, ${heure}. ${motsHeure[heure]}`;
-  } else if (jour) {
-    recap.textContent = `${jour}, noté. Et à quelle heure ?`;
-  } else if (heure) {
-    recap.textContent = `${heure}, parfait. Reste à trouver le jour !`;
-  } else {
-    recap.textContent = "";
-  }
-}
-
-selJour.addEventListener("change", majRecap);
-selHeure.addEventListener("change", majRecap);
-majRecap();
-
-/* "Fixer la date !" -> page 4 : l'ambiance */
-btnDate.addEventListener("click", () => {
-  allerAPage(page4);
-  pluieDeCoeurs();
-});
-
-/* ---------- Page 4 : le choix de l'ambiance ---------- */
-
-const cartesAmbiance = document.querySelectorAll(".ambiance");
-const recapAmbiance  = document.getElementById("recapAmbiance");
-const btnAmbiance    = document.getElementById("btnAmbiance");
-
-// Un mot pour chaque ambiance
-const motsAmbiance = {
-  "Sortie en amoureux": "Rien que nous deux, c'est noté 💕",
-  "Mougouli intense":   "Ambiance chaude, j'arrive 🔥",
-  "Soirée cinéma":      "Je m'occupe du popcorn 🍿",
-  "Balade à la plage":  "Coucher de soleil et pieds nus 🌊",
-};
-
-cartesAmbiance.forEach((carte) => {
-  carte.addEventListener("click", () => {
-    cartesAmbiance.forEach((c) => c.classList.remove("choisie"));
-    carte.classList.add("choisie");
-
-    rendezVous.ambiance = carte.dataset.nom;
-    recapAmbiance.textContent = motsAmbiance[rendezVous.ambiance];
-    btnAmbiance.disabled = false;
+    if (mouvementReduit) { deborder(); barre.style.width = "100%"; return; }
+    setTimeout(lancerCompteur, 500);
   });
+}, { threshold: 0.5 });
+
+observateurJauge.observe(jauge);
+
+/* ---------------------------------------------------------
+   4. Les cartes se retournent
+   --------------------------------------------------------- */
+document.querySelectorAll(".raison").forEach((carte) => {
+  carte.addEventListener("click", () => carte.classList.toggle("retournee"));
 });
 
-/* "C'est parti !" -> page 5 : le mot final */
-btnAmbiance.addEventListener("click", () => {
-  const carteChoisie = document.querySelector(".ambiance.choisie");
+/* ---------------------------------------------------------
+   5. La lettre s'écrit
+   --------------------------------------------------------- */
+const entete = document.getElementById("lettreEntete");
+const lignes = document.querySelectorAll(".lettre-ligne");
+const final  = document.querySelector(".lettre-final");
+const signature = document.querySelector(".signature");
+const TEXTE_ENTETE = "Irène,";
 
-  document.getElementById("finalJour").textContent  = rendezVous.jour;
-  document.getElementById("finalHeure").textContent = rendezVous.heure;
-  document.getElementById("finalAmbiance").textContent =
-    `Au programme : ${rendezVous.ambiance} ${carteChoisie.querySelector(".ambiance-icone").textContent}`;
+function ecrireLaLettre() {
+  // Les paragraphes montent un par un
+  lignes.forEach((ligne, i) => {
+    setTimeout(() => ligne.classList.add("visible"), 900 + i * 700);
+  });
 
-  allerAPage(page5);
-  pluieDeCoeurs();
-  setTimeout(pluieDeCoeurs, 900);
+  setTimeout(() => final.classList.add("visible"), 900 + lignes.length * 700);
+  setTimeout(() => signature.classList.add("visible"), 1200 + lignes.length * 700);
 
-  enregistrerReponse();
+  // L'en-tête se tape lettre par lettre
+  entete.classList.add("frappe");
+  let i = 0;
+
+  const frappe = setInterval(() => {
+    entete.textContent = TEXTE_ENTETE.slice(0, ++i);
+    if (i < TEXTE_ENTETE.length) return;
+
+    clearInterval(frappe);
+    setTimeout(() => entete.classList.remove("frappe"), 1600);
+  }, 170);
+}
+
+const observateurLettre = new IntersectionObserver((entrees) => {
+  entrees.forEach((entree) => {
+    if (!entree.isIntersecting) return;
+    observateurLettre.unobserve(entree.target);
+
+    if (mouvementReduit) {
+      entete.textContent = TEXTE_ENTETE;
+      [...lignes, final, signature].forEach((el) => el.classList.add("visible"));
+      return;
+    }
+
+    ecrireLaLettre();
+  });
+}, { threshold: 0.2 });
+
+observateurLettre.observe(document.querySelector(".lettre"));
+
+/* ---------------------------------------------------------
+   6. Le bouton "Je t'aime"
+   --------------------------------------------------------- */
+const bouton  = document.getElementById("boutonAmour");
+const message = document.getElementById("compteMessage");
+const total   = document.getElementById("compteTotal");
+
+const CLE = "irene-je-taime";
+let compte = Number(localStorage.getItem(CLE) || 0);
+
+// Le message change au fil des clics
+const etapes = [
+  [1,   "Encore une fois pour être sûr."],
+  [3,   "Tu peux continuer, je ne me lasse pas."],
+  [7,   "Sept fois. Et je le pense à chaque fois."],
+  [15,  "Tu commences à comprendre l'idée ?"],
+  [30,  "Trente. Et ce n'est même pas la moitié."],
+  [50,  "Cinquante fois, et le compteur tient encore mieux que l'autre."],
+  [100, "Cent. Là, tu le fais exprès — et j'adore ça."],
+  [200, "Deux cents. Bon, je te laisse, j'ai une déclaration à écrire."],
+];
+
+const COEURS = ["❤️", "💗", "💖", "💓", "🤍", "💘"];
+
+function majMessage() {
+  const etape = etapes.filter(([seuil]) => compte >= seuil).pop();
+  if (etape) message.textContent = etape[1];
+
+  total.textContent = compte > 0
+    ? `${compte} fois ${compte > 1 ? "déjà" : ""}`.trim()
+    : "";
+}
+
+if (compte > 0) majMessage();
+
+bouton.addEventListener("click", (e) => {
+  compte++;
+  localStorage.setItem(CLE, compte);
+  majMessage();
+
+  const r = bouton.getBoundingClientRect();
+  const x = e.clientX || r.left + r.width / 2;
+  const y = e.clientY || r.top + r.height / 2;
+
+  faireJaillirDesCoeurs(x, y);
 });
 
-/* ---------- Envoi des réponses au back-office ---------- */
+function faireJaillirDesCoeurs(x, y) {
+  if (mouvementReduit) return;
 
-function enregistrerReponse() {
-  // Si la base n'est pas joignable, le site continue de fonctionner normalement
-  if (typeof appelerBase !== "function") return;
+  for (let i = 0; i < 9; i++) {
+    const coeur = document.createElement("span");
 
-  appelerBase("irene_enregistrer", {
-    p_jour:       rendezVous.jour,
-    p_heure:      rendezVous.heure,
-    p_ambiance:   rendezVous.ambiance,
-    p_tentatives: nbFuites,          // nombre de tentatives sur le bouton "Non"
-    p_appareil:   navigator.userAgent,
-  }).catch((erreur) => console.warn("Réponse non enregistrée :", erreur.message));
-}
+    coeur.className = "eclat";
+    coeur.textContent = COEURS[Math.floor(Math.random() * COEURS.length)];
+    coeur.style.left = x + "px";
+    coeur.style.top = y + "px";
+    coeur.style.fontSize = aleatoire(16, 34) + "px";
+    coeur.style.setProperty("--dx", aleatoire(-160, 160) + "px");
+    coeur.style.setProperty("--dy", aleatoire(-220, -70) + "px");
+    coeur.style.setProperty("--rot", aleatoire(-90, 90) + "deg");
 
-/* ---------- Décor : coeurs qui montent ---------- */
-
-function creerBulle() {
-  const b = document.createElement("span");
-  b.className = "bulle";
-  b.textContent = Math.random() > 0.5 ? "💖" : "💕";
-  b.style.left = aleatoire(0, 100) + "vw";
-  b.style.fontSize = aleatoire(14, 34) + "px";
-  b.style.animationDuration = aleatoire(7, 14) + "s";
-  b.style.animationDelay = aleatoire(0, 6) + "s";
-  bulles.appendChild(b);
-}
-
-for (let i = 0; i < 18; i++) creerBulle();
-
-function pluieDeCoeurs() {
-  for (let i = 0; i < 25; i++) {
-    const b = document.createElement("span");
-    b.className = "bulle";
-    b.textContent = "💗";
-    b.style.left = aleatoire(0, 100) + "vw";
-    b.style.fontSize = aleatoire(18, 40) + "px";
-    b.style.animationDuration = aleatoire(3, 6) + "s";
-    b.style.animationDelay = aleatoire(0, 1) + "s";
-    bulles.appendChild(b);
-    setTimeout(() => b.remove(), 8000);
+    document.body.appendChild(coeur);
+    setTimeout(() => coeur.remove(), 1200);
   }
 }
